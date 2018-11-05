@@ -7,11 +7,15 @@
 #include "ModuleFadeToBlack.h"
 #include "ModuleSceneKen.h"
 #include "ModulePlayer.h"
+#include "Timers.h"
 
 using namespace std;
 
+Timer* timer;
+
 Application::Application()
 {
+	timer = new Timer();
 	// Order matters: they will init/start/pre/update/post in this order
 	modules.push_back(input = new ModuleInput());
 	modules.push_back(window = new ModuleWindow());
@@ -24,6 +28,7 @@ Application::Application()
 	modules.push_back(scene_ken = new ModuleSceneKen(false));
 	modules.push_back(player = new ModulePlayer(false));
 	modules.push_back(fade = new ModuleFadeToBlack());
+	timer->updateTime();
 }
 
 Application::~Application()
@@ -47,7 +52,7 @@ bool Application::Init()
 
 	// Start the first scene --
 	fade->FadeToBlack(scene_ken, nullptr, 3.0f);
-	
+	timer->updateTime();
 	return ret;
 }
 
@@ -66,7 +71,7 @@ update_status Application::Update()
 	for(list<Module*>::iterator it = modules.begin(); it != modules.end() && ret == UPDATE_CONTINUE; ++it)
 		if((*it)->IsEnabled() == true) 
 			ret = (*it)->PostUpdate();
-
+	timer->updateTime();
 	return ret;
 }
 
@@ -77,7 +82,7 @@ bool Application::CleanUp()
 	for(list<Module*>::reverse_iterator it = modules.rbegin(); it != modules.rend() && ret; ++it)
 		if((*it)->IsEnabled() == true) 
 			ret = (*it)->CleanUp();
-
+	timer->updateTime();
 	return ret;
 }
 
